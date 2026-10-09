@@ -1,0 +1,25 @@
+# التشغيل على VPS:  docker compose up -d --build
+# يحتاج ملف .env (انسخ .env.example) ومتغير DOMAIN داخله، مثل: DOMAIN=api.example.com
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - TRUST_PROXY=1
+      - GOOGLE_APPLICATION_CREDENTIALS=/secrets/firebase.json
+    volumes:
+      - ./data:/app/data        # الحسابات والأجهزة (خذ منه نسخة احتياطية)
+      - ./secrets:/secrets:ro   # ضع هنا firebase.json
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on: [app]
+volumes:
+  caddy_data:

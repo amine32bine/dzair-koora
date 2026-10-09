@@ -1,0 +1,7 @@
+# https تلقائي (شهادة مجانية) بمجرد توجيه الدومين إلى عنوان الخادم
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy app:8080 {
+		flush_interval -1
+	}
+}

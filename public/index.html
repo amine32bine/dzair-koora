@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#006233">
+<title>جزائري كورة</title>
+<link rel="icon" href="icon.svg">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="جزائري كورة">
+<style>
+:root{--g:#006233;--gd:#004a26;--r:#D21034;--gold:#D4AF37;--bg:#f4f7f5;--card:#fff;--tx:#12211a;--mut:#5d6f65;--line:#dfe8e2}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1511;--card:#16211b;--tx:#eaf2ed;--mut:#93a89b;--line:#25352c}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;line-height:1.5;padding-top:env(safe-area-inset-top,0)}
+#app{max-width:520px;margin:0 auto;min-height:100vh;padding-bottom:calc(76px + env(safe-area-inset-bottom,0))}
+.prayer{position:sticky;top:env(safe-area-inset-top,0);z-index:5;display:flex;gap:10px;align-items:center;width:100%;border:0;font:inherit;text-align:right;background:var(--gold);color:#2a2100;padding:10px 16px;cursor:pointer}
+.prayer b{font-weight:800}.prayer .cd{margin-inline-start:auto;font-weight:800;direction:ltr;font-variant-numeric:tabular-nums}
+.prayer.soon{animation:soon 1.6s ease-in-out infinite}@keyframes soon{50%{background:#e9cb5e}}
+header{background:var(--g);color:#fff;padding:14px 16px;display:flex;gap:12px;align-items:center}
+header img{width:42px;height:42px;border-radius:50%;background:#fff}
+header h1{margin:0;font-size:21px;line-height:1.2}header small{opacity:.85;font-size:13px}
+.times{display:flex;gap:6px;padding:12px 16px 0;overflow-x:auto}
+.times div{flex:1;min-width:58px;text-align:center;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:6px 4px;font-size:13px;color:var(--mut)}
+.times b{display:block;color:var(--tx);font-size:15px;direction:ltr}.times .on{border-color:var(--gold);box-shadow:inset 0 -3px 0 var(--gold)}
+main{padding:6px 16px 20px}
+h2{font-size:15px;color:var(--mut);margin:16px 0 8px;font-weight:600}
+.chips,.seg{display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px}
+.chips button,.seg button{flex:none;font:inherit;font-size:14px;border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:20px;padding:5px 14px;cursor:pointer}
+.gl{font-size:12px;color:var(--mut);margin:8px 0 -2px;font-weight:600}
+.chips button.on,.seg button.on{background:var(--g);border-color:var(--g);color:#fff}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.m{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px}
+.t{text-align:center;font-size:15px}.c{text-align:center;min-width:76px}.score{font-size:23px;font-weight:800;font-variant-numeric:tabular-nums}
+.c small{display:block;color:var(--mut);font-size:12px}.live .score,.live small{color:var(--r);font-weight:800}
+.live small:before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--r);margin-inline-end:4px;animation:p 1.2s infinite}@keyframes p{50%{opacity:.25}}
+.tw{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 6px;text-align:center;white-space:nowrap}th{color:var(--mut);font-weight:500;border-bottom:1px solid var(--line)}
+td:nth-child(2),th:nth-child(2){text-align:right;width:100%}tr+tr td{border-top:1px solid var(--line)}
+.sc{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.sc .k{width:24px;text-align:center;color:var(--mut)}.sc .w{flex:1}.sc small{display:block;color:var(--mut)}.sc .g{font-size:22px;font-weight:800}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.card h3{margin:0 0 10px;font-size:16px}
+input,select{width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--tx);margin-bottom:8px}
+.btn{font:inherit;border:0;background:var(--g);color:#fff;border-radius:10px;padding:10px 16px;cursor:pointer;font-weight:700}
+.btn.alt{background:none;color:var(--g);border:1px solid var(--g)}.btn.red{background:var(--r)}
+.row{display:flex;gap:8px;flex-wrap:wrap}.link{background:none;border:0;color:var(--g);text-decoration:underline;font:inherit;cursor:pointer;padding:4px}
+.note{color:var(--mut);font-size:13px;text-align:center;padding:12px 6px}.err{background:#fde8ec;color:#8a0f24;border-radius:10px;padding:10px;margin:10px 0;font-size:14px}
+.chk{display:flex;align-items:center;gap:8px;padding:6px 0}.chk input{width:auto;margin:0}
+.loading{text-align:center;color:var(--mut);padding:30px}
+nav{position:fixed;bottom:0;inset-inline:0;max-width:520px;margin:0 auto;z-index:6;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom,0)}
+nav button{flex:1;font:inherit;font-size:12.5px;border:0;background:none;color:var(--mut);padding:10px 0;cursor:pointer}
+nav button.on{color:var(--g);font-weight:800;box-shadow:inset 0 3px 0 var(--g)}
+@media (prefers-color-scheme:dark){nav button.on{color:#5fd18f;box-shadow:inset 0 3px 0 #5fd18f}}
+#toast{position:fixed;top:calc(12px + env(safe-area-inset-top,0));inset-inline:12px;max-width:496px;margin:0 auto;background:var(--r);color:#fff;border-radius:12px;padding:12px 16px;font-weight:700;z-index:9;transform:translateY(-200%);transition:transform .25s}
+#toast.show{transform:none}
+@media (prefers-reduced-motion:reduce){.prayer.soon,.live small:before{animation:none}}
+</style>
+</head>
+<body>
+<div id="app">
+<button class="prayer" id="prayer" aria-label="الصلاة القادمة"><span>🕌</span><span>الصلاة القادمة: <b id="pn">…</b> (<span id="pt">--:--</span>)</span><span class="cd" id="cd"></span></button>
+<header><img src="icon.svg" alt=""><div><h1>جزائري كورة</h1><small>المباريات وأوقات الصلاة في مكان واحد</small></div></header>
+<div class="times" id="times"></div>
+<main id="view"></main>
+</div>
+<nav id="nav">
+<button data-act="tab" data-v="m">المباريات</button><button data-act="tab" data-v="s">الترتيب</button><button data-act="tab" data-v="t">الهدافون</button><button data-act="tab" data-v="n">المنتخبات</button><button data-act="tab" data-v="a">حسابي</button>
+</nav>
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="config.js"></script>
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const S={api:LS.get("api",(window.APP_CONFIG||{}).API_BASE||""),token:LS.get("token",""),user:LS.get("user",null),tab:"m",sub:"live",lgM:0,lgS:186,lgT:186,kind:"g",auth:"login",email:"",
+ loc:LS.get("loc",{k:0,c:0}),alerts:LS.get("alerts",[]),leagues:[],football:true};
+const TEAMS=[["الجزائر","Algeria"],["المغرب","Morocco"],["تونس","Tunisia"],["مصر","Egypt"],["السعودية","Saudi Arabia"],["قطر","Qatar"],["السنغال","Senegal"],["فرنسا","France"],["البرازيل","Brazil"],["الأرجنتين","Argentina"]];
+const base=()=>S.api.replace(/\/+$/,"");
+async function api(path,o){o=o||{};const h={"Content-Type":"application/json"};if(S.token)h.Authorization="Bearer "+S.token;
+ let r;try{r=await fetch(base()+path,{method:o.method||"GET",headers:h,body:o.body?JSON.stringify(o.body):undefined})}catch(e){throw new Error("تعذّر الاتصال بالخادم. تحقق من عنوان الـ API في «حسابي».")}
+ const j=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(j.error||("خطأ "+r.status));e.data=j;e.status=r.status;throw e}return j}
+const hm=iso=>new Date(iso).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"Africa/Algiers"});
+function toast(m){const t=$("#toast");t.textContent=m;t.className="show";clearTimeout(toast.t);toast.t=setTimeout(()=>{t.className=""},6000)}
+const errBox=e=>'<div class="err">'+esc(e.message||e)+'</div>';
+
+/* ---------- الصلاة ---------- */
+let P=LS.get("prayer",null),lastTry=0;
+const KEYS=["fajr","dhuhr","asr","maghrib","isha"];
+async function loadPrayer(){lastTry=Date.now();try{P=await api("/api/prayer?country="+S.loc.k+"&city="+S.loc.c);LS.set("prayer",P)}catch(e){}tickP()}
+const pad=n=>String(n).padStart(2,"0");
+function tickP(){if(!P||!P.next)return;const left=Math.max(0,Math.round((Date.parse(P.next.iso)-Date.now())/1000));
+ $("#pn").textContent=P.next.name;$("#pt").textContent=P.next.time;
+ $("#cd").textContent="باقي "+pad(Math.floor(left/3600))+":"+pad(Math.floor(left%3600/60))+":"+pad(left%60);
+ $("#prayer").classList.toggle("soon",left<=600&&left>0);
+ $("#times").innerHTML=KEYS.map(k=>'<div'+(k===P.next.key?' class="on"':'')+'>'+esc(P.times[k].name)+'<b>'+esc(P.times[k].time)+'</b></div>').join("");
+ if(left===0&&Date.now()-lastTry>20000)loadPrayer()}
+$("#prayer").addEventListener("click",()=>{S.tab="a";render()});
+
+/* ---------- المباريات ---------- */
+const LIVE=new Map();let es=null;
+const isLive=s=>/^(1H|2H|ET|P|BT|LIVE)$/.test(s),isFin=s=>/^(FT|AET|PEN)$/.test(s);
+function mrow(m){const lv=isLive(m.status),ht=m.status==="HT";
+ const mid=(lv||ht||isFin(m.status))?(m.goals.home==null?0:m.goals.home)+" - "+(m.goals.away==null?0:m.goals.away):hm(m.kickoff);
+ const sub=lv?(m.minute?m.minute+"'":"مباشر"):ht?"استراحة":isFin(m.status)?"انتهت":"";
+ return '<div class="m'+(lv||ht?' live':'')+'"><div class="t">'+esc(m.home.name)+'</div><div class="c"><div class="score">'+mid+'</div><small>'+sub+'</small></div><div class="t">'+esc(m.away.name)+'</div></div>'}
+function grouped(list,empty){if(!list.length)return '<div class="note">'+empty+'</div>';const by={};list.forEach(m=>{(by[m.league.name]=by[m.league.name]||[]).push(m)});
+ return Object.keys(by).map(k=>'<h2>'+esc(k)+'</h2>'+by[k].map(mrow).join("")).join("")}
+const GL={top5:"الخمس الكبرى",cups:"الكؤوس الأوروبية",arab:"الدوريات العربية",africa:"أفريقيا",national:"المنتخبات"};
+const btn=(l,cur,act)=>'<button data-act="'+act+'" data-v="'+l.id+'" class="'+(String(l.id)===String(cur)?'on':'')+'">'+esc(l.name)+'</button>';
+const chips=(list,cur,act)=>{const first=list.filter(l=>!l.group).map(l=>btn(l,cur,act)).join("");let h=first?'<div class="chips">'+first+'</div>':'';
+ Object.keys(GL).forEach(g=>{const items=list.filter(l=>l.group===g);if(items.length)h+='<div class="gl">'+GL[g]+'</div><div class="chips">'+items.map(l=>btn(l,cur,act)).join("")+'</div>'});return h};
+const clubs=()=>S.leagues;
+let seq=0;
+function paint(html){$("#view").innerHTML=html}
+async function load(fn){const id=++seq;paint('<div class="loading">جارٍ التحميل…</div>');try{const h=await fn();if(id===seq)paint(h)}catch(e){if(id===seq)paint(errBox(e))}}
+function liveHtml(){return '<div class="seg"><button data-act="sub" data-v="live" class="on">مباشر الآن</button><button data-act="sub" data-v="today">اليوم</button></div>'+grouped([...LIVE.values()],"لا توجد مباريات جارية الآن في البطولات المتابعة.")}
+async function viewMatches(){
+ const seg='<div class="seg"><button data-act="sub" data-v="live" class="'+(S.sub==="live"?'on':'')+'">مباشر الآن</button><button data-act="sub" data-v="today" class="'+(S.sub==="today"?'on':'')+'">اليوم</button></div>';
+ if(S.sub==="live"){await loadLive();return seg+grouped([...LIVE.values()],"لا توجد مباريات جارية الآن في البطولات المتابعة.")}
+ const all=[{id:0,name:"كل البطولات"}].concat(S.leagues);
+ const r=await api("/api/matches"+(S.lgM?"?league="+S.lgM:""));
+ return seg+chips(all,S.lgM,"lgM")+grouped(r,"لا توجد مباريات اليوم.")}
+async function loadLive(){const l=await api("/api/live");LIVE.clear();l.forEach(f=>LIVE.set(f.id,f))}
+function refreshLive(){if(S.tab==="m"&&S.sub==="live")paint(liveHtml())}
+
+/* ---------- الترتيب والهدافون والمنتخبات ---------- */
+async function viewStandings(){const r=await api("/api/standings/"+S.lgS);
+ const t=r.table;const g=x=>(x>0?"+":"")+x;
+ return chips(clubs(),S.lgS,"lgS")+(t.length?'<h2>ترتيب '+esc(r.league.name)+'</h2><div class="tw"><table><tr><th>#</th><th>الفريق</th><th>لعب</th><th>ف</th><th>ت</th><th>خ</th><th>فارق</th><th>نقاط</th></tr>'+
+ t.map(x=>'<tr><td>'+x.rank+'</td><td>'+esc(x.team.name)+'</td><td>'+x.played+'</td><td>'+x.won+'</td><td>'+x.drawn+'</td><td>'+x.lost+'</td><td dir="ltr">'+(x.goalDiff==null?"–":g(x.goalDiff))+'</td><td><b>'+x.points+'</b></td></tr>').join("")+'</table></div>':'<div class="note">لا يوجد ترتيب متاح لهذه البطولة الآن.</div>')}
+async function viewTop(){const r=await api("/api/"+(S.kind==="a"?"assists":"scorers")+"/"+S.lgT);
+ const seg='<div class="seg"><button data-act="kind" data-v="g" class="'+(S.kind==="g"?'on':'')+'">الهدافون</button><button data-act="kind" data-v="a" class="'+(S.kind==="a"?'on':'')+'">الصناعة</button></div>';
+ return chips(clubs(),S.lgT,"lgT")+seg+(r.length?r.slice(0,20).map(x=>'<div class="sc"><span class="k">'+x.rank+'</span><div class="w"><b dir="ltr">'+esc(x.player.name)+'</b><small>'+esc(x.team.name)+'</small></div><span class="g">'+(S.kind==="a"?x.assists:x.goals)+'</span></div>').join(""):'<div class="note">لا توجد بيانات لهذه البطولة الآن.</div>')}
+let natSel="Algeria";
+async function viewNat(){const bar='<div class="chips">'+TEAMS.map(t=>'<button data-act="nat" data-v="'+t[1]+'" class="'+(t[1]===natSel?'on':'')+'">'+t[0]+'</button>').join("")+'</div>';
+ const r=await api("/api/national/"+encodeURIComponent(natSel));
+ return bar+(r.note?'<div class="note">'+esc(r.note)+'</div>':'')+'<h2>آخر النتائج — '+esc(r.team.name)+'</h2>'+(r.last.map(mrow).join("")||'<div class="note">—</div>')+'<h2>المباريات القادمة</h2>'+(r.next.map(mrow).join("")||'<div class="note">—</div>')}
+
+/* ---------- الحساب والإعدادات ---------- */
+const val=id=>($("#"+id)||{value:""}).value.trim();
+function authHtml(){const m=S.auth,f=(id,ph,t)=>'<input id="'+id+'" type="'+(t||"text")+'" placeholder="'+ph+'" autocomplete="'+(t==="password"?"current-password":id==="f-email"?"email":"off")+'">';
+ let h='<div class="card"><h3>'+({login:"تسجيل الدخول",register:"إنشاء حساب",verify:"تأكيد البريد",forgot:"نسيت كلمة المرور",reset:"كلمة مرور جديدة"}[m])+'</h3><div id="msg"></div>';
+ if(m==="register")h+=f("f-name","الاسم");
+ if(m==="login"||m==="register"||m==="forgot")h+=f("f-email","البريد الإلكتروني","email");
+ if(m==="login"||m==="register")h+=f("f-pass","كلمة المرور (8 أحرف على الأقل)","password");
+ if(m==="verify"||m==="reset")h+='<p class="note">أرسلنا رمزًا من 6 أرقام إلى <b dir="ltr">'+esc(S.email)+'</b></p>'+f("f-code","الرمز");
+ if(m==="reset")h+=f("f-pass","كلمة المرور الجديدة","password");
+ h+='<div class="row"><button class="btn" data-act="'+m+'">'+({login:"دخول",register:"تسجيل",verify:"تأكيد",forgot:"إرسال الرمز",reset:"حفظ"}[m])+'</button>';
+ if(m==="verify")h+='<button class="btn alt" data-act="resend">إعادة إرسال الرمز</button>';
+ h+='</div><div class="row" style="margin-top:8px">';
+ if(m!=="login")h+='<button class="link" data-act="mode" data-v="login">لدي حساب</button>';
+ if(m!=="register")h+='<button class="link" data-act="mode" data-v="register">حساب جديد</button>';
+ if(m==="login")h+='<button class="link" data-act="mode" data-v="forgot">نسيت كلمة المرور؟</button>';
+ return h+'</div></div>'}
+function profileHtml(){const u=S.user||{};return '<div class="card"><h3>👤 '+esc(u.name)+'</h3><p dir="ltr" style="text-align:right;margin:0 0 10px">'+esc(u.email)+'</p><div class="row"><button class="btn alt" data-act="logout">تسجيل الخروج</button><button class="btn red" data-act="delacc">حذف الحساب</button></div></div>'}
+async function settingsHtml(){let h='';
+ try{const[cs,cities]=await Promise.all([api("/api/countries"),api("/api/countries/"+S.loc.k+"/cities")]);
+  h+='<div class="card"><h3>📍 المدينة لمواقيت الصلاة</h3><select data-chg="country">'+cs.map(c=>'<option value="'+c.id+'"'+(c.id===S.loc.k?' selected':'')+'>'+esc(c.name)+'</option>').join("")+'</select><select data-chg="city">'+cities.map(c=>'<option value="'+c.id+'"'+(c.id===S.loc.c?' selected':'')+'>'+esc(c.name)+'</option>').join("")+'</select></div>'}
+ catch(e){h+=errBox(e)}
+ if(S.leagues.length)h+='<div class="card"><h3>🔔 إشعارات الأهداف</h3><p class="note" style="text-align:right;padding:0 0 8px">اختر البطولات التي يصلك إشعار عند كل هدف فيها (أثناء فتح التطبيق).</p>'+S.leagues.map(l=>'<label class="chk"><input type="checkbox" data-chg="alert" value="'+l.id+'"'+(S.alerts.includes(l.id)?' checked':'')+'>'+esc(l.name)+'</label>').join("")+'</div>';
+ return h}
+function apiHtml(){return '<div class="card"><h3>🔗 عنوان الـ API</h3><input id="f-api" dir="ltr" placeholder="https://your-server.com (فارغ = نفس الخادم)" value="'+esc(S.api)+'"><div class="row"><button class="btn" data-act="saveapi">حفظ</button><button class="btn alt" data-act="resetapi">الافتراضي</button></div></div>'}
+let installEv=null;window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();installEv=e;if(S.tab==="a")render()});
+const standalone=()=>window.matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+const installHtml=()=>native()||standalone()?'':installEv?'<button class="btn" data-act="install" style="margin-bottom:10px">📲 تثبيت التطبيق على هاتفك</button>':'<p class="note" style="text-align:right;padding:0 0 8px">لتثبيته: في أندرويد (كروم) القائمة ← «تثبيت التطبيق»، وفي آيفون (سفاري) زر المشاركة ← «إضافة إلى الشاشة الرئيسية».</p>';
+const aboutHtml=()=>'<div class="card"><h3>ℹ️ حول التطبيق</h3>'+installHtml()+'<p style="margin:0 0 6px">تطوير: <b>عبد القادر أمين</b> — الجزائر 🇩🇿</p><a class="link" href="'+esc(base())+'/privacy" target="_blank" rel="noopener">سياسة الخصوصية</a></div>';
+const noAcc='<div class="card"><h3>👤 الحساب</h3><p class="note" style="text-align:right;padding:0">الحسابات متوقفة مؤقتًا في هذه النسخة التجريبية. التطبيق يعمل كاملًا بدونها، وتُحفظ إعداداتك على هاتفك.</p></div>';
+async function viewAccount(){return (S.token?profileHtml():S.accounts===false?noAcc:authHtml())+await settingsHtml()+apiHtml()+aboutHtml()}
+function msg(t,ok){const m=$("#msg");if(m)m.innerHTML=t?'<div class="'+(ok?'note':'err')+'">'+esc(t)+'</div>':""}
+function applyUser(r){S.token=r.token;S.user=r.user;LS.set("token",r.token);LS.set("user",r.user);const st=r.user.settings||{};
+ S.loc={k:st.country||0,c:st.city||0};S.alerts=st.leagues||[];LS.set("loc",S.loc);LS.set("alerts",S.alerts);loadPrayer();openStream();syncDevice();render()}
+function sync(){if(!S.token)return;api("/api/me/settings",{method:"PUT",body:{country:S.loc.k,city:S.loc.c,leagues:S.alerts,teams:[]}}).catch(()=>{})}
+async function authAct(a){try{
+ if(a==="login"){S.email=val("f-email");const r=await api("/api/auth/login",{method:"POST",body:{email:S.email,password:$("#f-pass").value}});applyUser(r)}
+ else if(a==="register"){S.email=val("f-email");await api("/api/auth/register",{method:"POST",body:{name:val("f-name"),email:S.email,password:$("#f-pass").value}});S.auth="verify";render()}
+ else if(a==="verify"){const r=await api("/api/auth/verify",{method:"POST",body:{email:S.email,code:val("f-code")}});applyUser(r)}
+ else if(a==="resend"){await api("/api/auth/resend",{method:"POST",body:{email:S.email}});msg("أُرسل رمز جديد.",true)}
+ else if(a==="forgot"){S.email=val("f-email");await api("/api/auth/forgot",{method:"POST",body:{email:S.email}});S.auth="reset";render()}
+ else if(a==="reset"){await api("/api/auth/reset",{method:"POST",body:{email:S.email,code:val("f-code"),password:$("#f-pass").value}});S.auth="login";await render();msg("تم تغيير كلمة المرور، سجّل الدخول.",true)}
+}catch(e){if(e.data&&e.data.needsVerify){S.auth="verify";await render();msg("أكّد بريدك أولًا: أدخل الرمز المرسل إليك أو اطلب رمزًا جديدًا.")}else msg(e.message)}}
+
+/* ---------- البث المباشر والإشعارات ---------- */
+function openStream(){if(es){es.close();es=null}if(!S.football)return;
+ es=new EventSource(base()+"/api/stream");
+ es.addEventListener("live",e=>{JSON.parse(e.data).fixtures.forEach(f=>LIVE.set(f.id,f));refreshLive()});
+ es.addEventListener("finished",e=>{JSON.parse(e.data).ids.forEach(i=>LIVE.delete(i));refreshLive()});
+ es.addEventListener("goal",e=>{const d=JSON.parse(e.data),f=d.fixture;if(!S.alerts.includes(f.league.id))return;
+  const t="⚽ هدف! "+f.home.name+" "+f.goals.home+" - "+f.goals.away+" "+f.away.name;const who=(d.scorer.player?d.scorer.player+" ":"")+d.scorer.minute+"'";
+  toast(t+" — "+who);try{if(navigator.vibrate)navigator.vibrate([200,100,200]);if(window.Notification&&Notification.permission==="granted")new Notification("⚽ هدف!",{body:f.home.name+" "+f.goals.home+" - "+f.goals.away+" "+f.away.name+"\n"+who})}catch(x){}})}
+
+/* ---------- إشعارات الهاتف (تطبيق Capacitor فقط) ---------- */
+S.pushToken=LS.get("pushToken","");
+const native=()=>!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
+function syncDevice(){if(!S.pushToken)return;api("/api/devices",{method:"POST",body:{token:S.pushToken,platform:(Capacitor.getPlatform&&Capacitor.getPlatform())||"android",leagues:S.alerts}}).catch(()=>{})}
+let pushOn=false;
+async function initPush(){if(!native()||pushOn)return;const P=Capacitor.Plugins&&Capacitor.Plugins.PushNotifications;if(!P)return;
+ try{let st=await P.checkPermissions();if(st.receive==="prompt")st=await P.requestPermissions();if(st.receive!=="granted")return;
+  pushOn=true;
+  P.addListener("registration",t=>{S.pushToken=t.value;LS.set("pushToken",t.value);syncDevice()});
+  P.addListener("registrationError",()=>{pushOn=false});
+  P.addListener("pushNotificationReceived",n=>toast((n.title||"")+" "+(n.body||"")));
+  await P.register()}catch(e){pushOn=false}}
+
+/* ---------- التنقل ---------- */
+async function render(){document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===S.tab));
+ const t=S.tab;await load(t==="m"?viewMatches:t==="s"?viewStandings:t==="t"?viewTop:t==="n"?viewNat:viewAccount)}
+document.addEventListener("click",e=>{const el=e.target.closest("[data-act]");if(!el)return;const a=el.dataset.act,v=el.dataset.v;
+ if(a==="tab"){S.tab=v;render()}
+ else if(a==="sub"){S.sub=v;render()}
+ else if(a==="lgM"){S.lgM=+v;render()}else if(a==="lgS"){S.lgS=+v;render()}else if(a==="lgT"){S.lgT=+v;render()}
+ else if(a==="kind"){S.kind=v;render()}else if(a==="nat"){natSel=v;render()}
+ else if(a==="mode"){S.auth=v;render()}
+ else if(["login","register","verify","resend","forgot","reset"].includes(a))authAct(a);
+ else if(a==="logout"){S.token="";S.user=null;LS.set("token","");LS.set("user",null);S.auth="login";render()}
+ else if(a==="delacc"){if(!confirm("سيُحذف حسابك نهائيًا. هل أنت متأكد؟"))return;const p=prompt("اكتب كلمة المرور لتأكيد الحذف");if(!p)return;
+  api("/api/me",{method:"DELETE",body:{password:p}}).then(()=>{S.token="";S.user=null;LS.set("token","");LS.set("user",null);toast("تم حذف حسابك");render()}).catch(x=>toast(x.message))}
+ else if(a==="install"){if(installEv){installEv.prompt();installEv=null}}
+ else if(a==="saveapi"){S.api=val("f-api");LS.set("api",S.api);boot()}
+ else if(a==="resetapi"){S.api=(window.APP_CONFIG||{}).API_BASE||"";LS.set("api",S.api);boot()}});
+document.addEventListener("change",e=>{const el=e.target.closest("[data-chg]");if(!el)return;const c=el.dataset.chg;
+ if(c==="country"){S.loc={k:+el.value,c:0};LS.set("loc",S.loc);loadPrayer();sync();render()}
+ else if(c==="city"){S.loc.c=+el.value;LS.set("loc",S.loc);loadPrayer();sync()}
+ else if(c==="alert"){const id=+el.value;S.alerts=el.checked?[...new Set([...S.alerts,id])]:S.alerts.filter(x=>x!==id);LS.set("alerts",S.alerts);sync();initPush();syncDevice();
+  if(el.checked&&window.Notification&&Notification.permission==="default")Notification.requestPermission()}});
+
+async function boot(){
+ try{const h=await api("/api/health");S.football=!!h.football;S.accounts=h.accounts;S.af=!(h.providers&&!h.providers.apiFootball);
+  if(!S.af){const nb=document.querySelector('nav button[data-v="n"]');if(nb)nb.style.display="none"}S.leagues=await api("/api/leagues");
+  if(S.leagues.length&&!S.leagues.some(l=>l.id===S.lgS)){S.lgS=S.lgT=(clubs()[0]||S.leagues[0]).id}
+  if(S.token){try{const u=await api("/api/me");S.user=u;LS.set("user",u)}catch(e){if(e.status===401){S.token="";S.user=null;LS.set("token","")}}}
+  await loadPrayer();openStream();if(S.alerts.length)initPush();syncDevice();
+  if(!S.football)toast("المباريات تحتاج API_FOOTBALL_KEY في الخادم، ومواقيت الصلاة تعمل.")}
+ catch(e){S.tab="a"}
+ render()}
+if("serviceWorker"in navigator&&!native()&&(location.protocol==="https:"||location.hostname==="localhost"))navigator.serviceWorker.register("sw.js").catch(()=>{});
+setInterval(tickP,1000);
+boot();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "appId": "dz.dzairkoora.app",
+  "appName": "جزائري كورة",
+  "webDir": "www",
+  "server": { "androidScheme": "https" },
+  "plugins": {
+    "PushNotifications": { "presentationOptions": ["badge", "sound", "alert"] },
+    "StatusBar": { "style": "DARK", "backgroundColor": "#006233" }
+  }
+}

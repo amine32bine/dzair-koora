@@ -1,0 +1,18 @@
+# يقرأه موقع Render تلقائيًا (New ← Blueprint). المفتاح لا يُكتب هنا، بل تُدخله أنت في لوحة Render.
+services:
+  - type: web
+    name: dzair-koora
+    runtime: node
+    plan: free
+    buildCommand: npm install --omit=optional
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: FOOTBALL_DATA_KEY
+        sync: false
+      - key: NODE_VERSION
+        value: "20"
+      - key: TRUST_PROXY
+        value: "1"
+      - key: ACCOUNTS
+        value: "off"

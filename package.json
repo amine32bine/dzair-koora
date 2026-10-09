@@ -1,0 +1,9 @@
+{
+  "name": "dzair-koora",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "جزائري كورة: API + تطبيق ويب (يُغلَّف للجوال) — تطوير عبد القادر أمين",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=14.18" },
+  "optionalDependencies": { "firebase-admin": "^12.0.0" }
+}
