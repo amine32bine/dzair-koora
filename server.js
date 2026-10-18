@@ -52,6 +52,8 @@ const NATIONAL = [
 const GROUP = { 39: "top5", 140: "top5", 135: "top5", 78: "top5", 61: "top5", 2: "cups", 3: "cups", 848: "cups", 12: "africa", 20: "africa" };
 const GROUP_ORDER = { top5: 0, cups: 1, arab: 2, africa: 3, national: 4 };
 const NAMES = new Map([...CLUBS, ...NATIONAL]);
+const EN = new Map([[39, "Premier League"], [140, "La Liga"], [135, "Serie A"], [78, "Bundesliga"], [61, "Ligue 1"], [2, "Champions League"], [3, "Europa League"], [848, "Conference League"], [12, "CAF Champions League"], [20, "CAF Confederation Cup"], [186, "Algerian Ligue 1"], [307, "Saudi Pro League"], [233, "Egyptian Premier League"], [200, "Moroccan Botola Pro"], [202, "Tunisian Ligue 1"], [305, "Qatar Stars League"], [301, "UAE Pro League"], [542, "Iraqi Premier League"], [1, "World Cup"], [6, "Africa Cup of Nations"], [36, "AFCON Qualifiers"], [29, "World Cup Qualifiers - Africa"], [32, "World Cup Qualifiers - Europe"], [34, "World Cup Qualifiers - South America"], [4, "Euro"], [5, "Nations League"], [9, "Copa América"], [7, "Asian Cup"], [10, "International Friendlies"]]);
+for (const [id, n] of NAMES) if (!EN.has(id)) EN.set(id, n);
 const METHODS = { mwl: [18, 17, 0, 1], eg: [19.5, 17.5, 0, 1], pk: [18, 18, 0, 2], na: [15, 15, 0, 1], uq: [18.5, 0, 90, 1] };
 const KEYS = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
 const AR = ["الفجر", "الظهر", "العصر", "المغرب", "العشاء"];
@@ -92,7 +94,7 @@ const slim = (f) => ({
   kickoff: f.fixture.date,
   status: f.fixture.status.short, // NS, 1H, HT, 2H, ET, P, FT ...
   minute: f.fixture.status.elapsed,
-  league: { id: f.league.id, name: NAMES.get(f.league.id) || f.league.name, country: f.league.country },
+  league: { id: f.league.id, name: NAMES.get(f.league.id) || f.league.name, en: EN.get(f.league.id) || f.league.name, country: f.league.country },
   home: { id: f.teams.home.id, name: f.teams.home.name, logo: f.teams.home.logo },
   away: { id: f.teams.away.id, name: f.teams.away.name, logo: f.teams.away.logo },
   goals: { home: f.goals.home, away: f.goals.away },
@@ -123,7 +125,7 @@ const fdSlim = (m) => {
   const lid = FDREV[m.competition?.code], ft = m.score?.fullTime || {};
   return {
     id: -m.id, kickoff: m.utcDate, status: FDS[m.status] || "NS", minute: m.minute ?? null,
-    league: { id: lid, name: NAMES.get(lid) || m.competition?.name, country: m.area?.name || "" },
+    league: { id: lid, name: NAMES.get(lid) || m.competition?.name, en: EN.get(lid) || m.competition?.name, country: m.area?.name || "" },
     home: { id: m.homeTeam.id, name: m.homeTeam.shortName || m.homeTeam.name, logo: m.homeTeam.crest },
     away: { id: m.awayTeam.id, name: m.awayTeam.shortName || m.awayTeam.name, logo: m.awayTeam.crest },
     goals: { home: ft.home ?? null, away: ft.away ?? null },
@@ -131,7 +133,7 @@ const fdSlim = (m) => {
 };
 // دمج المزوّدين: نتائج API-Football أولًا، ثم football-data للبطولات التي لم تغطّها
 async function merged(jobs) {
-  if (!jobs.length) throw new HttpError(503, "ضع FOOTBALL_DATA_KEY (مجاني) أو API_FOOTBALL_KEY في ملف .env");
+  if (!jobs.length) throw new HttpError(503, probing ? "جارٍ تهيئة المصادر المجانية، أعد المحاولة بعد لحظات" : "لا يوجد مصدر بيانات متاح لهذه البطولة الآن. يمكنك وضع FOOTBALL_DATA_KEY أو API_FOOTBALL_KEY في الإعدادات.");
   const res = await Promise.allSettled(jobs);
   const lists = res.filter((r) => r.status === "fulfilled").map((r) => r.value);
   if (!lists.length) throw res[0].reason;
@@ -139,7 +141,84 @@ async function merged(jobs) {
   for (const l of lists) { const add = l.filter((x) => !have.has(x.league.id)); out.push(...add); for (const x of l) have.add(x.league.id); }
   return out;
 }
-const avail = (id) => (!AF && !FD) || !!(FD && FDMAP[id]) || !!AF;
+const avail = (id) => (!AF && !FD && (probing || !ESPN_ON)) || !!(FD && FDMAP[id]) || !!AF || espnOK[id] === true;
+
+// ---------- ESPN: مجاني وبدون مفتاح (مصدر غير رسمي وقد يتغيّر). يُستعمل للبطولات التي لا يغطيها المزوّدان ----------
+const ESPN_ON = process.env.ESPN !== "off";
+const ESPN_BASE = process.env.ESPN_BASE || "https://site.api.espn.com/apis";
+const ESPN_SLUG = { 39: "eng.1", 140: "esp.1", 135: "ita.1", 78: "ger.1", 61: "fra.1", 2: "uefa.champions", 3: "uefa.europa", 848: "uefa.europa.conf", 12: "caf.champions", 20: "caf.confed", 186: "alg.1", 307: "ksa.1", 233: "egy.1", 200: "mar.1", 202: "tun.1", 305: "qat.1", 301: "uae.1", 542: "irq.1", 1: "fifa.world", 6: "caf.nations", 29: "fifa.worldq.caf", 32: "fifa.worldq.uefa", 34: "fifa.worldq.conmebol", 4: "uefa.euro", 5: "uefa.nations", 9: "conmebol.america", 10: "fifa.friendly" };
+// ESPN_EXTRA=ID:slug,ID:slug  لإضافة بطولات (الـ ID هو رقم البطولة عندنا، والـ slug اسمها عند ESPN)
+for (const x of (process.env.ESPN_EXTRA || "").split(",").map((v) => v.trim()).filter(Boolean)) { const [i, sl] = x.split(":"); if (Number(i) && sl) ESPN_SLUG[Number(i)] = sl; }
+const espnOK = {};
+let probing = true;
+const useEspn = (id) => ESPN_ON && !AF && !useFd(id) && espnOK[id] === true;
+const espnIds = () => Object.keys(ESPN_SLUG).map(Number).filter(useEspn);
+async function espn(path, ttl = 60_000) {
+  const key = "es" + path, hit = cache.get(key);
+  if (hit && Date.now() - hit.t < ttl) return hit.d;
+  const r = await fetch(ESPN_BASE + path);
+  if (!r.ok) throw new HttpError(r.status === 404 ? 404 : 502, `ESPN (${r.status})`);
+  const d = await r.json();
+  cache.set(key, { t: Date.now(), d });
+  return d;
+}
+async function pool(items, n, fn) {
+  const out = [];
+  for (let i = 0; i < items.length; i += n) out.push(...(await Promise.allSettled(items.slice(i, i + n).map(fn))));
+  return out;
+}
+async function probeEspn(onlyFailed = false) {
+  if (!ESPN_ON) { probing = false; return; }
+  const ids = Object.keys(ESPN_SLUG).map(Number).filter((id) => !onlyFailed || espnOK[id] !== true);
+  await pool(ids, 4, async (id) => {
+    try { const d = await espn(`/site/v2/sports/soccer/${ESPN_SLUG[id]}/scoreboard`, 0); espnOK[id] = Array.isArray(d.events) || Array.isArray(d.leagues); }
+    catch (e) { espnOK[id] = false; if (process.env.DEBUG) console.error("ESPN probe", ESPN_SLUG[id], e.message); }
+  });
+  probing = false;
+  console.log("ESPN المتاح:", Object.keys(espnOK).filter((k) => espnOK[k]).join(",") || "لا شيء");
+}
+probeEspn();
+setInterval(() => probeEspn(true), 10 * 60_000).unref(); // إعادة فحص ما فشل (قد يكون انقطاعًا مؤقتًا)
+setInterval(() => probeEspn(false), 12 * 3600_000).unref();
+const espnScorer = new Map();
+function espnSlim(ev, lid) {
+  const c = ev.competitions?.[0] || {}, cs = c.competitors || [];
+  const h = cs.find((x) => x.homeAway === "home") || cs[0] || {}, a = cs.find((x) => x.homeAway === "away") || cs[1] || {};
+  const st = ev.status?.type || {}, state = st.state, nm = st.name || "";
+  const status = nm === "STATUS_HALFTIME" ? "HT" : state === "in" ? "LIVE" : state === "post" ? "FT" : /POSTPONED/.test(nm) ? "PST" : /CANCEL/.test(nm) ? "CANC" : "NS";
+  const id = -(3e9 + Number(ev.id));
+  const team = (x) => ({ id: Number(x.team?.id) || 0, name: x.team?.displayName || x.team?.shortDisplayName || "", logo: x.team?.logo || "" });
+  const plays = (c.details || []).filter((d) => d.scoringPlay);
+  if (plays.length) {
+    const p = plays[plays.length - 1], tm = cs.find((x) => String(x.team?.id) === String(p.team?.id));
+    espnScorer.set(id, { player: p.athletesInvolved?.[0]?.displayName || "", minute: parseInt(p.clock?.displayValue) || "", team: tm?.team?.displayName || "", type: p.type?.text || "Goal" });
+  }
+  const score = (x) => (state === "pre" ? null : Number(x.score));
+  return { id, kickoff: ev.date, status, minute: state === "in" ? parseInt(ev.status?.displayClock) || null : null,
+    league: { id: lid, name: NAMES.get(lid), en: EN.get(lid) || NAMES.get(lid), country: "" }, home: team(h), away: team(a), goals: { home: score(h), away: score(a) } };
+}
+const espnPath = (id, date) => `/site/v2/sports/soccer/${ESPN_SLUG[id]}/scoreboard` + (date ? `?dates=${date.replace(/-/g, "")}` : "");
+async function espnDay(id, date) { return ((await espn(espnPath(id, date), 5 * 60_000)).events || []).map((e) => espnSlim(e, id)); }
+async function espnLive() {
+  const res = await pool(espnIds(), 5, async (id) => {
+    let evs = (await espn(espnPath(id), 5 * 60_000)).events || [];
+    const active = evs.some((e) => { const s = e.status?.type?.state, d = Date.parse(e.date) - Date.now(); return s === "in" || (s === "pre" && d < 15 * 60_000 && d > -4 * 3600_000); });
+    if (active) evs = (await espn(espnPath(id), Number(process.env.ESPN_LIVE_TTL ?? 40_000))).events || [];
+    return evs.map((e) => espnSlim(e, id)).filter((x) => x.status === "LIVE" || x.status === "HT");
+  });
+  return res.filter((r) => r.status === "fulfilled").flatMap((r) => r.value);
+}
+async function espnStandings(lid) {
+  const d = await espn(`/v2/sports/soccer/${ESPN_SLUG[lid]}/standings`, 10 * 60_000);
+  const stat = (e, ...ns) => { for (const n of ns) { const x = (e.stats || []).find((y) => y.name === n || y.abbreviation === n); if (x && x.value != null) return Number(x.value); } return null; };
+  const groups = d.children?.length ? d.children : [d];
+  const tables = groups.map((g) => (g.standings?.entries || []).map((e, i) => ({
+    rank: stat(e, "rank") || i + 1, team: { id: Number(e.team?.id) || 0, name: e.team?.displayName || e.team?.shortDisplayName || "", logo: e.team?.logos?.[0]?.href || "" },
+    points: stat(e, "points", "P") ?? 0, played: stat(e, "gamesPlayed", "GP") ?? 0, won: stat(e, "wins", "W") ?? 0, drawn: stat(e, "ties", "D") ?? 0, lost: stat(e, "losses", "L") ?? 0,
+    goalsFor: stat(e, "pointsFor", "F"), goalsAgainst: stat(e, "pointsAgainst", "A"), goalDiff: stat(e, "pointDifferential", "GD"), form: "",
+  })).sort((x, y) => x.rank - y.rank)).filter((t) => t.length);
+  return { league: { id: lid, name: NAMES.get(lid), en: EN.get(lid) || NAMES.get(lid) }, season: d.season?.year ?? null, table: tables[0] || [], tables };
+}
 
 // ---------- مواقيت الصلاة ----------
 const ymd = (tz, ms = Date.now()) => { const d = localDate(tz, ms); return `${d[0]}-${String(d[1] + 1).padStart(2, "0")}-${String(d[2]).padStart(2, "0")}`; };
@@ -218,10 +297,12 @@ function send(event, data, fixtures) {
 async function liveFixtures(ttl = 20_000) {
   const jobs = [];
   if (AF) jobs.push(af("/fixtures?live=all", ttl).then((r) => r.filter(known).map(slim)));
+  if (espnIds().length) jobs.push(espnLive());
   if (FD) jobs.push(fd("/matches?status=LIVE", Math.max(ttl, Number(process.env.FD_MIN_TTL ?? 30_000))).then((d) => (d.matches || []).map(fdSlim).filter((x) => x.league.id)));
   return merged(jobs);
 }
 async function scorerOf(fx) {
+  if (espnScorer.has(fx.id)) return espnScorer.get(fx.id);
   if (fx.id > 0 && AF) {
     try {
       const ev = await af(`/fixtures/events?fixture=${fx.id}&type=Goal`, 0);
@@ -241,7 +322,7 @@ async function emitGoal(fx) {
   console.log("هدف:", fx.home.name, fx.goals.home, "-", fx.goals.away, fx.away.name);
 }
 async function pollGoals() {
-  if ((!AF && !FD) || (!clients.size && !(fcm && deviceCount()))) { seen.clear(); liveSnap = []; return; }
+  if ((!AF && !FD && !(ESPN_ON && espnIds().length)) || (!clients.size && !(fcm && deviceCount()))) { seen.clear(); liveSnap = []; return; }
   try {
     const res = await liveFixtures(0);
     liveSnap = res;
@@ -267,18 +348,19 @@ const routes = [];
 const add = (m) => (re, h) => routes.push([m, re, h]);
 const get = add("GET"), post = add("POST"), put = add("PUT"), del = add("DELETE");
 
-get(/^\/api\/health$/, () => ({ ok: true, football: !!(AF || FD), accounts: !ACCOUNTS_OFF, providers: { apiFootball: !!AF, footballData: !!FD }, season: season(), push: !!fcm, sseClients: clients.size, requestsToday: reqToday }));
-get(/^\/api\/countries$/, () => COUNTRIES.map((c, i) => ({ id: i, name: c.n, cities: c.c.length })));
+get(/^\/api\/health$/, () => ({ ok: true, football: !!(AF || FD || espnIds().length), accounts: !ACCOUNTS_OFF, espn: ESPN_ON, providers: { apiFootball: !!AF, footballData: !!FD }, season: season(), push: !!fcm, sseClients: clients.size, requestsToday: reqToday }));
+get(/^\/api\/espn\/check$/, () => ({ enabled: ESPN_ON, probing, available: Object.keys(espnOK).filter((k) => espnOK[k]).map(Number), unavailable: Object.keys(espnOK).filter((k) => !espnOK[k]).map(Number) }));
+get(/^\/api\/countries$/, () => COUNTRIES.map((c, i) => ({ id: i, name: c.n, iso: c.iso, cities: c.c.length })));
 get(/^\/api\/countries\/(\d+)\/cities$/, (q, [k]) => {
   const K = COUNTRIES[+k];
   if (!K) throw new HttpError(404, "دولة غير موجودة");
-  return K.c.map((c, i) => ({ id: i, name: c.n, lat: c.lat, lng: c.lng, tz: c.tz }));
+  return K.c.map((c, i) => ({ id: i, name: c.n, en: c.en, lat: c.lat, lng: c.lng, tz: c.tz }));
 });
 get(/^\/api\/prayer$/, (q) => prayerToday(q));
 get(/^\/api\/prayer\/month$/, (q) => prayerMonth(q));
 get(/^\/api\/leagues$/, (q) => [
-  ...CLUBS.map(([id, name]) => ({ id, name, type: "club", group: GROUP[id] || "arab" })),
-  ...NATIONAL.map(([id, name]) => ({ id, name, type: "national", group: "national" })),
+  ...CLUBS.map(([id, name]) => ({ id, name, en: EN.get(id) || name, type: "club", group: GROUP[id] || "arab" })),
+  ...NATIONAL.map(([id, name]) => ({ id, name, en: EN.get(id) || name, type: "national", group: "national" })),
 ].filter((l) => q.get("all") || avail(l.id)).sort((x, y) => GROUP_ORDER[x.group] - GROUP_ORDER[y.group]));
 get(/^\/api\/leagues\/search$/, async (q) => {
   const t = (q.get("q") || "").trim();
@@ -295,6 +377,7 @@ get(/^\/api\/matches$/, async (q) => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new HttpError(400, "التاريخ بصيغة YYYY-MM-DD");
   const lg = q.get("league") ? leagueId(q.get("league")) : null;
   const jobs = [];
+  if (lg ? useEspn(lg) : espnIds().length) jobs.push(pool(lg ? [lg] : espnIds(), 5, (id) => espnDay(id, date)).then((r) => r.filter((x) => x.status === "fulfilled").flatMap((x) => x.value)));
   if (AF && !(lg && useFd(lg))) {
     const path = `/fixtures?date=${date}&timezone=${TZ}` + (lg ? `&league=${lg}&season=${season()}` : "");
     jobs.push(af(path, 5 * 60_000).then((r) => (lg ? r : r.filter(known)).map(slim)));
@@ -307,6 +390,7 @@ get(/^\/api\/matches$/, async (q) => {
 });
 get(/^\/api\/standings\/(\d+)$/, async (q, [id]) => {
   const lid = leagueId(id);
+  if (useEspn(lid)) return espnStandings(lid);
   if (useFd(lid)) {
     const d = await fd(`/competitions/${FDMAP[lid]}/standings`, 10 * 60_000);
     const row = (x) => ({ rank: x.position, team: { id: x.team.id, name: x.team.shortName || x.team.name, logo: x.team.crest }, points: x.points, played: x.playedGames, won: x.won, drawn: x.draw, lost: x.lost, goalsFor: x.goalsFor, goalsAgainst: x.goalsAgainst, goalDiff: x.goalDifference, form: x.form });
@@ -320,6 +404,7 @@ get(/^\/api\/standings\/(\d+)$/, async (q, [id]) => {
 });
 const players = (kind) => async (q, [id]) => {
   const lid = leagueId(id);
+  if (useEspn(lid)) return []; // قوائم الهدافين غير متاحة مجانًا من هذا المصدر
   if (useFd(lid)) {
     const d = await fd(`/competitions/${FDMAP[lid]}/scorers?limit=50`, 10 * 60_000);
     let l = (d.scorers || []).map((x) => ({ player: { id: x.player.id, name: x.player.name, photo: "" }, team: { id: x.team.id, name: x.team.shortName || x.team.name }, goals: x.goals ?? 0, assists: x.assists ?? 0, played: x.playedMatches ?? 0 }));
@@ -414,7 +499,7 @@ http.createServer(async (req, res) => {
   if (bump(ip) > 300 || (u.pathname.startsWith("/api/auth/") && bump(ip + "|auth") > 20)) return tooMany(res);
 
   if (req.method === "GET" && u.pathname === "/api/stream") {
-    if (!AF && !FD) { res.statusCode = 503; res.setHeader("Content-Type", "application/json; charset=utf-8"); return res.end('{"error":"ضع FOOTBALL_DATA_KEY أو API_FOOTBALL_KEY في .env"}'); }
+    if (!AF && !FD && !ESPN_ON) { res.statusCode = 503; res.setHeader("Content-Type", "application/json; charset=utf-8"); return res.end('{"error":"ضع FOOTBALL_DATA_KEY أو API_FOOTBALL_KEY في .env"}'); }
     if (clients.size >= 3000) { res.statusCode = 503; res.setHeader("Content-Type", "application/json; charset=utf-8"); return res.end('{"error":"الخادم مشغول"}'); }
     res.writeHead(200, { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", Connection: "keep-alive", "X-Accel-Buffering": "no" });
     const c = { res, leagues: csv(q.get("leagues")), teams: csv(q.get("teams")) };
