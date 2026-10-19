@@ -167,13 +167,42 @@ async function pool(items, n, fn) {
   for (let i = 0; i < items.length; i += n) out.push(...(await Promise.allSettled(items.slice(i, i + n).map(fn))));
   return out;
 }
+// اكتشاف تلقائي لاسم البطولة عند ESPN إن لم يصح التخمين (يقرأ قائمة كل البطولات ويبحث بحسب رمز الدولة)
+const ESPN_CORE = process.env.ESPN_CORE_BASE || "https://sports.core.api.espn.com/v2";
+const ESPN_PREFIX = { 186: ["alg", "dza"], 307: ["ksa", "sau"], 233: ["egy"], 200: ["mar", "mor"], 202: ["tun"], 305: ["qat"], 301: ["uae", "are"], 542: ["irq"] };
+const espnDetail = {};
+let espnSlugs = null;
+async function discoverSlugs() {
+  if (espnSlugs) return espnSlugs;
+  const r = await fetch(`${ESPN_CORE}/sports/soccer/leagues?limit=1000`);
+  if (!r.ok) throw new Error("core " + r.status);
+  const j = await r.json();
+  espnSlugs = (j.items || []).map((x) => (String(x.$ref || "").match(/leagues\/([^?/]+)/) || [])[1]).filter(Boolean);
+  return espnSlugs;
+}
+async function probeOne(id) {
+  const tried = [];
+  let err = "";
+  const test = async (slug) => {
+    tried.push(slug);
+    try { const d = await espn(`/site/v2/sports/soccer/${slug}/scoreboard`, 0); return Array.isArray(d.events) || Array.isArray(d.leagues); }
+    catch (e) { err = e.message; return false; }
+  };
+  espnOK[id] = await test(ESPN_SLUG[id]);
+  if (!espnOK[id] && ESPN_PREFIX[id]) {
+    try {
+      const all = await discoverSlugs(), pre = ESPN_PREFIX[id];
+      const cands = [...new Set([...pre.map((p) => p + ".1"), ...all.filter((x) => pre.some((p) => x.startsWith(p + ".")))])].filter((x) => all.includes(x) && !tried.includes(x)).slice(0, 4);
+      for (const c of cands) if (await test(c)) { ESPN_SLUG[id] = c; espnOK[id] = true; break; }
+    } catch (e) { err = "discover: " + e.message; }
+  }
+  espnDetail[id] = { slug: ESPN_SLUG[id], ok: espnOK[id], tried, error: espnOK[id] ? "" : err };
+  if (process.env.DEBUG && !espnOK[id]) console.error("ESPN probe", id, tried.join(","), err);
+}
 async function probeEspn(onlyFailed = false) {
   if (!ESPN_ON) { probing = false; return; }
   const ids = Object.keys(ESPN_SLUG).map(Number).filter((id) => !onlyFailed || espnOK[id] !== true);
-  await pool(ids, 4, async (id) => {
-    try { const d = await espn(`/site/v2/sports/soccer/${ESPN_SLUG[id]}/scoreboard`, 0); espnOK[id] = Array.isArray(d.events) || Array.isArray(d.leagues); }
-    catch (e) { espnOK[id] = false; if (process.env.DEBUG) console.error("ESPN probe", ESPN_SLUG[id], e.message); }
-  });
+  await pool(ids, 4, probeOne);
   probing = false;
   console.log("ESPN المتاح:", Object.keys(espnOK).filter((k) => espnOK[k]).join(",") || "لا شيء");
 }
@@ -349,7 +378,7 @@ const add = (m) => (re, h) => routes.push([m, re, h]);
 const get = add("GET"), post = add("POST"), put = add("PUT"), del = add("DELETE");
 
 get(/^\/api\/health$/, () => ({ ok: true, football: !!(AF || FD || espnIds().length), accounts: !ACCOUNTS_OFF, espn: ESPN_ON, providers: { apiFootball: !!AF, footballData: !!FD }, season: season(), push: !!fcm, sseClients: clients.size, requestsToday: reqToday }));
-get(/^\/api\/espn\/check$/, () => ({ enabled: ESPN_ON, probing, available: Object.keys(espnOK).filter((k) => espnOK[k]).map(Number), unavailable: Object.keys(espnOK).filter((k) => !espnOK[k]).map(Number) }));
+get(/^\/api\/espn\/check$/, () => ({ enabled: ESPN_ON, probing, detail: espnDetail, available: Object.keys(espnOK).filter((k) => espnOK[k]).map(Number), unavailable: Object.keys(espnOK).filter((k) => !espnOK[k]).map(Number) }));
 get(/^\/api\/countries$/, () => COUNTRIES.map((c, i) => ({ id: i, name: c.n, iso: c.iso, cities: c.c.length })));
 get(/^\/api\/countries\/(\d+)\/cities$/, (q, [k]) => {
   const K = COUNTRIES[+k];
