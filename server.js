@@ -466,9 +466,28 @@ async function nationalFD(n) {
     note: "نتائج كأس العالم فقط. الودّيات والتصفيات تحتاج مفتاح API-Football المدفوع.",
   };
 }
+// مباريات المنتخب من ESPN (مجاني): الودّيات والتصفيات وأمم أفريقيا وكأس العالم... خلال 90 يومًا ماضية و120 قادمة
+async function nationalESPN(n) {
+  const ids = NATIONAL.map(([id]) => id).filter((id) => espnOK[id] === true && ESPN_SLUG[id]);
+  if (!ids.length) throw new HttpError(404, "مصدر ESPN غير متاح لبطولات المنتخبات الآن");
+  const f = (ms) => new Date(ms).toISOString().slice(0, 10).replace(/-/g, "");
+  const range = `${f(Date.now() - 90 * 864e5)}-${f(Date.now() + 120 * 864e5)}`;
+  const same = (x) => String(x || "").toLowerCase() === n.toLowerCase();
+  const res = await pool(ids, 5, async (id) => ((await espn(`/site/v2/sports/soccer/${ESPN_SLUG[id]}/scoreboard?dates=${range}&limit=400`, 10 * 60_000)).events || []).map((e) => espnSlim(e, id)));
+  const all = res.filter((r) => r.status === "fulfilled").flatMap((r) => r.value).filter((x) => same(x.home.name) || same(x.away.name));
+  if (!all.length) throw new HttpError(404, "لا مباريات لهذا المنتخب في الفترة القريبة (الأسماء بالإنجليزية، مثل Algeria)");
+  const side = same(all[0].home.name) ? all[0].home : all[0].away, byT = (a, b) => String(a.kickoff).localeCompare(String(b.kickoff));
+  return {
+    team: { id: side.id, name: n, logo: side.logo },
+    last: all.filter((x) => x.status === "FT").sort((a, b) => byT(b, a)).slice(0, 10),
+    next: all.filter((x) => x.status !== "FT").sort(byT).slice(0, 10),
+    note: "المصدر: ESPN (مجاني)، وقد لا يشمل كل المباريات.",
+  };
+}
 get(/^\/api\/national\/([^/]+)$/, async (q, [name]) => {
   const n = decodeURIComponent(name);
-  if (AF) { try { return await nationalAF(n); } catch (e) { if (!FD) throw e; } }
+  if (AF) { try { return await nationalAF(n); } catch (e) { if (!FD && !ESPN_ON) throw e; } }
+  if (ESPN_ON && NATIONAL.some(([id]) => espnOK[id])) { try { return await nationalESPN(n); } catch (e) { if (!FD) throw e; } }
   if (FD) return nationalFD(n);
   throw new HttpError(503, "ضع FOOTBALL_DATA_KEY (مجاني) أو API_FOOTBALL_KEY في ملف .env");
 });
