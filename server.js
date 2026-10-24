@@ -436,12 +436,12 @@ const players = (kind) => async (q, [id]) => {
   if (useEspn(lid)) return []; // قوائم الهدافين غير متاحة مجانًا من هذا المصدر
   if (useFd(lid)) {
     const d = await fd(`/competitions/${FDMAP[lid]}/scorers?limit=50`, 10 * 60_000);
-    let l = (d.scorers || []).map((x) => ({ player: { id: x.player.id, name: x.player.name, photo: "" }, team: { id: x.team.id, name: x.team.shortName || x.team.name }, goals: x.goals ?? 0, assists: x.assists ?? 0, played: x.playedMatches ?? 0 }));
+    let l = (d.scorers || []).map((x) => ({ player: { id: x.player.id, name: x.player.name, photo: "" }, team: { id: x.team.id, name: x.team.shortName || x.team.name, logo: x.team.crest }, goals: x.goals ?? 0, assists: x.assists ?? 0, played: x.playedMatches ?? 0 }));
     if (kind === "assists") l = l.filter((x) => x.assists > 0).sort((x, y) => y.assists - x.assists);
     return l.slice(0, 20).map((x, i) => ({ rank: i + 1, ...x }));
   }
   const r = await af(`/players/top${kind}?league=${lid}&season=${season()}`, 10 * 60_000);
-  return r.map((x, i) => { const st = x.statistics[0]; return { rank: i + 1, player: { id: x.player.id, name: x.player.name, photo: x.player.photo }, team: { id: st.team.id, name: st.team.name }, goals: st.goals.total ?? 0, assists: st.goals.assists ?? 0, played: st.games.appearences ?? 0 }; });
+  return r.map((x, i) => { const st = x.statistics[0]; return { rank: i + 1, player: { id: x.player.id, name: x.player.name, photo: x.player.photo }, team: { id: st.team.id, name: st.team.name, logo: st.team.logo }, goals: st.goals.total ?? 0, assists: st.goals.assists ?? 0, played: st.games.appearences ?? 0 }; });
 };
 get(/^\/api\/scorers\/(\d+)$/, players("scorers"));
 get(/^\/api\/assists\/(\d+)$/, players("assists"));

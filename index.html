@@ -38,7 +38,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 .t{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;font-size:15px}
 .bd{position:relative;display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--line);font-size:11px;font-weight:800;color:var(--mut);overflow:hidden;flex:none}
 .bd img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff}
-.tn{display:inline-flex;align-items:center;gap:8px}.c{text-align:center;min-width:76px}.score{font-size:23px;font-weight:800;font-variant-numeric:tabular-nums}
+.tn{display:inline-flex;align-items:center;gap:8px}
+.sc small.tn{display:flex;margin-top:2px}.sc .bd{width:20px;height:20px;font-size:10px}.c{text-align:center;min-width:76px}.score{font-size:23px;font-weight:800;font-variant-numeric:tabular-nums}
 .c small{display:block;color:var(--mut);font-size:12px}.live .score,.live small{color:var(--r);font-weight:800}
 .live small:before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--r);margin-inline-end:4px;animation:p 1.2s infinite}@keyframes p{50%{opacity:.25}}
 .tw{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:12px}
@@ -252,7 +253,7 @@ async function viewStandings(){const r=await api("/api/standings/"+S.lgS);
  tb.map(x=>'<tr><td>'+x.rank+'</td><td><span class="tn">'+badge(x.team)+esc(x.team.name)+'</span></td><td>'+x.played+'</td><td>'+x.won+'</td><td>'+x.drawn+'</td><td>'+x.lost+'</td><td dir="ltr">'+(x.goalDiff==null?"–":g(x.goalDiff))+'</td><td><b>'+x.points+'</b></td></tr>').join("")+'</table></div>':'<div class="note">'+t("no_table")+'</div>')}
 async function viewTop(){const r=await api("/api/"+(S.kind==="a"?"assists":"scorers")+"/"+S.lgT);
  const seg='<div class="seg"><button data-act="kind" data-v="g" class="'+(S.kind==="g"?'on':'')+'">'+t("scorers")+'</button><button data-act="kind" data-v="a" class="'+(S.kind==="a"?'on':'')+'">'+t("assists")+'</button></div>';
- return chips(S.leagues,S.lgT,"lgT")+seg+(r.length?r.slice(0,20).map(x=>'<div class="sc"><span class="k">'+x.rank+'</span><div class="w"><b class="pl">'+esc(x.player.name)+'</b><small>'+esc(x.team.name)+'</small></div><span class="g">'+(S.kind==="a"?x.assists:x.goals)+'</span></div>').join(""):'<div class="note">'+t("no_data")+'</div>')}
+ return chips(S.leagues,S.lgT,"lgT")+seg+(r.length?r.slice(0,20).map(x=>'<div class="sc"><span class="k">'+x.rank+'</span><div class="w"><b class="pl">'+esc(x.player.name)+'</b><small class="tn">'+badge(x.team)+esc(x.team.name)+'</small></div><span class="g">'+(S.kind==="a"?x.assists:x.goals)+'</span></div>').join(""):'<div class="note">'+t("no_data")+'</div>')}
 let natSel="Algeria";
 async function viewNat(){const bar='<div class="chips">'+TEAMS.map(x=>'<button data-act="nat" data-v="'+x[0]+'" class="'+(x[0]===natSel?'on':'')+'">'+esc(region(x[1],x[0]))+'</button>').join("")+'</div>';
  const r=await api("/api/national/"+encodeURIComponent(natSel));
