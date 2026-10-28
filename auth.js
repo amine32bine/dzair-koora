@@ -12,13 +12,40 @@ const DIR = new URL("./data/", import.meta.url);
 fs.mkdirSync(DIR, { recursive: true });
 const FILE = new URL("users.json", DIR);
 
+// تخزين دائم مجاني: ضع UPSTASH_REDIS_REST_URL و UPSTASH_REDIS_REST_TOKEN (من upstash.com) فتبقى الحسابات حتى لو أُعيد تشغيل الخادم.
+// بدونهما يُستعمل ملف data/users.json (يُمسح على الاستضافة المجانية عند كل نوم).
+const KV_URL = (process.env.UPSTASH_REDIS_REST_URL || "").replace(/\/+$/, ""), KV_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || "";
+const USE_KV = !!(KV_URL && KV_TOKEN);
+async function kv(cmd) {
+  const r = await fetch(KV_URL, { method: "POST", headers: { Authorization: "Bearer " + KV_TOKEN, "Content-Type": "application/json" }, body: JSON.stringify(cmd) });
+  const j = await r.json();
+  if (!r.ok || j.error) throw new Error(j.error || "KV " + r.status);
+  return j.result;
+}
+const saved = new Map(); // email -> آخر JSON محفوظ
 let DB = { users: {} };
-try { DB = JSON.parse(fs.readFileSync(FILE, "utf8")); } catch {}
+if (USE_KV) {
+  try {
+    const a = (await kv(["HGETALL", "dk:users"])) || [];
+    for (let i = 0; i + 1 < a.length; i += 2) { DB.users[a[i]] = JSON.parse(a[i + 1]); saved.set(a[i], a[i + 1]); }
+    console.log("الحسابات: تخزين دائم (Upstash)، عدد المستخدمين:", Object.keys(DB.users).length);
+  } catch (e) { console.error("تعذّر تحميل الحسابات من Upstash:", e.message); }
+} else {
+  try { DB = JSON.parse(fs.readFileSync(FILE, "utf8")); } catch {}
+}
+async function flushKV() {
+  for (const [e, u] of Object.entries(DB.users)) {
+    const j = JSON.stringify(u);
+    if (saved.get(e) !== j) { await kv(["HSET", "dk:users", e, j]); saved.set(e, j); }
+  }
+  for (const e of [...saved.keys()]) if (!DB.users[e]) { await kv(["HDEL", "dk:users", e]); saved.delete(e); }
+}
 let timer = null;
 function persist() {
   if (timer) return;
   timer = setTimeout(() => {
     timer = null;
+    if (USE_KV) return flushKV().catch((e) => console.error("حفظ الحسابات:", e.message));
     const tmp = new URL("users.json.tmp", DIR);
     fs.writeFileSync(tmp, JSON.stringify(DB));
     fs.renameSync(tmp, FILE);
@@ -106,9 +133,12 @@ export function setupAuth({ post, get, put, del, HttpError, COUNTRIES }) {
     const code = String(crypto.randomBytes(4).readUInt32BE(0) % 1000000).padStart(6, "0");
     u.code = { h: codeHash(u.email, code), exp: Date.now() + 15 * 60_000, tries: 0, purpose, at: Date.now() };
     persist();
+    const v = purpose === "verify";
     await sendMail(u.email,
-      purpose === "verify" ? "رمز تأكيد حسابك في جزائري كورة" : "رمز إعادة تعيين كلمة المرور",
-      `رمزك: ${code}\nصالح لمدة 15 دقيقة. إذا لم تطلبه فتجاهل هذه الرسالة.`);
+      v ? "رمز تأكيد حسابك · Verification code · Code de vérification" : "رمز إعادة تعيين كلمة المرور · Password reset code · Code de réinitialisation",
+      `رمزك: ${code}\nصالح لمدة 15 دقيقة. إذا لم تطلبه فتجاهل هذه الرسالة.\n\n` +
+      `Your code: ${code}\nValid for 15 minutes. If you did not request it, ignore this message.\n\n` +
+      `Votre code : ${code}\nValable 15 minutes. Si vous ne l'avez pas demandé, ignorez ce message.\n\n— جزائري كورة`);
   }
   function checkCode(u, purpose, code) {
     const c = u.code;

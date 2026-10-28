@@ -564,7 +564,7 @@ http.createServer(async (req, res) => {
   }
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   try {
-    if (ACCOUNTS_OFF && (u.pathname.startsWith("/api/auth/") || u.pathname.startsWith("/api/me") || u.pathname.startsWith("/api/devices"))) throw new HttpError(503, "الحسابات متوقفة مؤقتًا في هذه النسخة التجريبية");
+    if (ACCOUNTS_OFF && (u.pathname.startsWith("/api/auth/") || u.pathname.startsWith("/api/me") || u.pathname.startsWith("/api/devices"))) throw new HttpError(503, "الحسابات متوقفة مؤقتًا");
     const body = req.method === "GET" ? {} : await readBody(req);
     for (const [m, re, h] of routes) {
       if (m !== req.method) continue;

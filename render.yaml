@@ -14,5 +14,13 @@ services:
         value: "20"
       - key: TRUST_PROXY
         value: "1"
-      - key: ACCOUNTS
-        value: "off"
+      - key: JWT_SECRET
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
